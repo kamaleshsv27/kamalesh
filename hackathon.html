@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔐 Privacy Guardian</title>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        .container {
+            background: #1e293b;
+            padding: 20px;
+            margin: 20px auto;
+            width: 60%;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .green { background: green; }
+        .red { background: red; }
+        .blue { background: blue; }
+
+        #log {
+            height: 150px;
+            overflow-y: scroll;
+            background: black;
+            padding: 10px;
+            text-align: left;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+            width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🔐 Privacy Guardian</h1>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="container">
+    <h2>Login</h2>
+    <input id="username" placeholder="Username"><br>
+    <input id="password" type="password" placeholder="Password"><br>
+
+    <button onclick="login()" class="green">Login</button>
+    <button onclick="showRegister()" class="blue">Register</button>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="registerPage" class="container" style="display:none;">
+    <h2>Register</h2>
+    <input id="reg_user" placeholder="Username"><br>
+    <input id="reg_pass" type="password" placeholder="Password"><br>
+
+    <button onclick="register()" class="green">Create Account</button>
+    <button onclick="showLogin()" class="red">Back to Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="container" style="display:none;">
+
+    <h3>📷 Camera: <span id="camera">Safe</span></h3>
+    <h3>🎤 Microphone: <span id="mic">Safe</span></h3>
+    <h3>📍 Location: <span id="location">Safe</span></h3>
+
+    <h2 id="alert" style="color:red;">System Secure ✅</h2>
+    <h3>Threat Level: <span id="threat">LOW</span></h3>
+
+    <button onclick="startScan()" class="green">Start Scan</button>
+    <button onclick="exitApp()" class="red">Logout</button>
+
+    <h3>Logs:</h3>
+    <div id="log"></div>
+
+</div>
+
+<script>
+
+// ---------------- STORAGE ----------------
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+// ---------------- PAGE SWITCH ----------------
+function showRegister() {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("registerPage").style.display = "block";
+}
+
+function showLogin() {
+    document.getElementById("registerPage").style.display = "none";
+    document.getElementById("loginPage").style.display = "block";
+}
+
+// ---------------- REGISTER ----------------
+function register() {
+    let user = document.getElementById("reg_user").value;
+    let pass = document.getElementById("reg_pass").value;
+
+    if (!user || !pass) {
+        alert("Fill all fields!");
+        return;
+    }
+
+    users.push({ username: user, password: pass });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Account Created!");
+    showLogin();
+}
+
+// ---------------- LOGIN ----------------
+function login() {
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+
+    let valid = users.find(u => u.username === user && u.password === pass);
+
+    if (valid) {
+        alert("Login Successful");
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+    } else {
+        alert("Invalid Login");
+    }
+}
+
+// ---------------- SIMULATION ----------------
+let apps = [
+    "WhatsApp", "Snapchat", "Facebook", "Instagram",
+    "Google", "X", "ShareChat", "Instagram Lite",
+    "Amazon", "Flipkart", "Meesho", "Myntra", "Ajio"
+];
+
+function getRandomApps() {
+    let shuffled = apps.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.floor(Math.random() * 5) + 2);
+}
+
+// ---------------- ALERT ----------------
+function alertUser() {
+    alert("⚠️ Privacy Threat Detected!");
+
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+    }
+}
+
+// ---------------- SCAN ----------------
+function scanSystem() {
+    let runningApps = getRandomApps();
+
+    let cam = Math.random() > 0.5;
+    let mic = Math.random() > 0.5;
+    let gps = Math.random() > 0.5;
+
+    document.getElementById("camera").innerText = cam ? "⚠️ In Use" : "Safe";
+    document.getElementById("mic").innerText = mic ? "⚠️ In Use" : "Safe";
+    document.getElementById("location").innerText = gps ? "⚠️ In Use" : "Safe";
+
+    if (cam || mic || gps) {
+        document.getElementById("alert").innerText = "⚠️ Privacy Threat Detected!";
+        document.getElementById("threat").innerText = ["MEDIUM", "HIGH"][Math.floor(Math.random()*2)];
+        alertUser();
+    } else {
+        document.getElementById("alert").innerText = "System Secure ✅";
+        document.getElementById("threat").innerText = "LOW";
+    }
+
+    let log = document.getElementById("log");
+    log.innerHTML += new Date().toLocaleString() + " | Apps: " + runningApps + "<br>";
+    log.scrollTop = log.scrollHeight;
+}
+
+// ---------------- AUTO SCAN ----------------
+function startScan() {
+    scanSystem();
+    setInterval(scanSystem, 3000);
+}
+
+// ---------------- EXIT ----------------
+function exitApp() {
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>
